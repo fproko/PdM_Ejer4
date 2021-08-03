@@ -6,16 +6,20 @@
  *===========================================================================*/
 #include "sapi.h"
 
-// FSM state names
+//FSM Antirebote
 typedef enum{
-   STATE_INIT,
-   STATE_1,
-   STATE_2,
-   // ...
-   STATE_N
-} fsmState_t;
+   BtN_UP,       //Mientras el botón está liberado.
+   BtN_FALLING,  //Mientras está ocurriendo el flanco descendente, hace anti_rebote
+   BtN_RISING,   //Mientras está ocurriendo el flanco ascendente, hace anti_rebote
+   BtN_DOWN      //Mientras el botón está presionado.
+} ButtonState_t;
 
-// FSM functions
-void fsmError( void );
-void fsmInit( void );
-void fsmUpdate( void );
+void ButtonInit(void);
+void ButtonUpdate( gpioMap_t tecla );
+void ButtonError( void );
+
+void buttonPressed( gpioMap_t tecla);
+void buttonReleased( gpioMap_t tecla);
+
+
+

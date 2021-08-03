@@ -9,6 +9,7 @@
 
 #include "main.h"
 #include "sapi.h"
+#include "teclas.h"
 
 /*=====[Definition macros of private constants]==============================*/
 
@@ -20,19 +21,21 @@
 
 /*=====[Main function, program entry point after power on or reset]==========*/
 
-int main( void )
+int main(void)
 {
    // ----- Setup -----------------------------------
-   boardInit();
+   boardInit();   // Se inicializa el Hardware
+   //fsmInit();   //Inicializa máquina de estados finitos
+   ButtonInit();  //Se inicializa FSM de Anti-rebote
 
    // ----- Repeat for ever -------------------------
-   while( true ) {
-      gpioToggle(LED);
-      delay(500);
+   while (true)
+   {
+      ButtonUpdate(TEC1); //Se actualiza estado
    }
 
    // YOU NEVER REACH HERE, because this program runs directly or on a
-   // microcontroller and is not called by any Operating System, as in the 
+   // microcontroller and is not called by any Operating System, as in the
    // case of a PC program.
    return 0;
 }
