@@ -10,6 +10,7 @@
 #include "main.h"
 #include "sapi.h"
 #include "teclas.h"
+#include "semaforo.h"
 
 /*=====[Definition macros of private constants]==============================*/
 
@@ -24,14 +25,16 @@
 int main(void)
 {
    // ----- Setup -----------------------------------
-   boardInit();   // Se inicializa el Hardware
-   //fsmInit();   //Inicializa máquina de estados finitos
-   ButtonInit();  //Se inicializa FSM de Anti-rebote
+   boardInit();     // Se inicializa el Hardware
+   buttonDBInit();  //Se inicializa FSM de Anti-rebote
+   modeInit();      //Se inicializa FSM Mode
+   semaphoreInit(); //Se inicializa FSM Semaforo
 
    // ----- Repeat for ever -------------------------
    while (true)
    {
-      ButtonUpdate(TEC1); //Se actualiza estado
+      buttonDBUpdate(TEC2); //Se actualiza estado del Botón
+      semaphoreUpdate();    //Se actualiza el estado del Semaforo
    }
 
    // YOU NEVER REACH HERE, because this program runs directly or on a

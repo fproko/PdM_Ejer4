@@ -6,17 +6,9 @@
  *===========================================================================*/
 #include "sapi.h"
 #include "teclas.h"
-#include "led.h"
+#include "semaforo.h"
 
-/*=============================================================================
- * Function: leerTecla 
- * Description: La función lee el estado de la entrada del uC luego de apretar una tecla
- * Inpunt: 
-	1) Tecla a leer -> TEC1, TEC2, TEC3 o TEC4
- * Output: Valor booleano estado_tecla
-	"0" -> Tecla apretada (ON)
-	"1" -> Tecla sin apretar (OFF)
- *===========================================================================*/
+//Función leerTecla
 bool_t leerTecla(gpioMap_t tecla)
 {
 	bool_t estado_tecla;
@@ -25,42 +17,41 @@ bool_t leerTecla(gpioMap_t tecla)
 }
 
 // Variable de estado actual (global), de tipo ButtonState_t
-ButtonState_t ButtonState;
+static ButtonState_t ButtonState;
 
 //FSM Anti-rebote Init
-void ButtonInit( void )
+void buttonDBInit( void )
 {
    ButtonState = BtN_UP; //Se inicializa FSM de Anti-rebote
 }
 
 //FSM Anti-rebote Error
-void ButtonError( void )
+void buttonDBError( void )
 {
    ButtonState = BtN_UP;
 }
 
 void buttonPressed( gpioMap_t tecla )
 {
-   static uint8_t tec1pressed = 0;
-   if (tecla == TEC1)
+   static uint8_t tec2pressed = 0;
+   if (tecla == TEC2)
    {
-      tec1pressed++;
+      tec2pressed++;
    }   
 }
 
 void buttonReleased( gpioMap_t tecla )
 {
-   static uint8_t tec1released = 0;
-   if (tecla == TEC1)
+   if (tecla == TEC2)
    {
-      tec1released++;
+      modeUpdate(); //Se cambia de modo
    }
 }   
 
 //FSM Anti-rebote Update
-void ButtonUpdate(gpioMap_t tecla)
+void buttonDBUpdate(gpioMap_t tecla)
 {
-   static delay_t delay; //declaración de estructura tipo delay_t
+   static delay_t delayDB; //declaración de estructura tipo delay_t
 
    switch (ButtonState)
    {
@@ -69,20 +60,18 @@ void ButtonUpdate(gpioMap_t tecla)
       if (leerTecla(tecla) == 0)
       {
          ButtonState = BtN_FALLING;
-         delayWrite(&delay, 40); //setea el delay
+         delayWrite(&delayDB, 40); //setea el delay
       }
       break;
 
    case BtN_FALLING:
       //Resuelve las acciones correspondientes al flanco descendente.
-      if (delayRead(&delay)) //si se cumple el delay seteado ingresa
+      if (delayRead(&delayDB)) //si se cumple el delay seteado ingresa
       {
          if (leerTecla(tecla) == 0) //Si tecla sigue presionada
          {
             ButtonState = BtN_DOWN; //Pasa al estado DOWN
             buttonPressed(tecla);
-            //apagarLeds();
-            //encenderLed(LED3);
          }
          else
          {
@@ -96,20 +85,18 @@ void ButtonUpdate(gpioMap_t tecla)
       if (!(leerTecla(tecla) == 0))
       {
          ButtonState = BtN_RISING;
-         delayWrite(&delay, 40); //setea el delay
+         delayWrite(&delayDB, 40); //setea el delay
       }
       break;
 
    case BtN_RISING:
       //Resuelve las acciones correspondientes al flanco ascendente.
-      if (delayRead(&delay)) //si se cumple el delay seteado ingresa
+      if (delayRead(&delayDB)) //si se cumple el delay seteado ingresa
       {
          if (!(leerTecla(tecla) == 0)) //Si la tecla sigue no presionada
          {
             ButtonState = BtN_UP; //Pasa al estado UP
             buttonReleased(tecla);
-            //apagarLeds();
-            //encenderLed(LED1);
          }
          else
          {
@@ -119,7 +106,7 @@ void ButtonUpdate(gpioMap_t tecla)
       break;
 
    default:
-      ButtonError();
+      buttonDBError();
       break;
    }
 }
